@@ -21,11 +21,16 @@ if not MONGODB_URI or not DB_NAME or not COLLECTION_NAME:
 def clean_value(value: Any) -> Any:
     if pd.isna(value):
         return None
-    return value
-
+    else:
+        return value
 
 def normalize_record(record: Dict[str, Any]) -> Dict[str, Any]:
-    return {key: clean_value(value) for key, value in record.items()}
+    normalized = {}
+
+    for key, value in record.items():
+        normalized[key] = clean_value(value)
+
+    return normalized
 
 
 def insert_batches(csv_path: str, batch_size: int = DEFAULT_BATCH_SIZE) -> None:
@@ -65,11 +70,14 @@ def create_indexes() -> None:
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python load_data.py <csv_path> [batch_size]")
         sys.exit(1)
 
     csv_file_path = sys.argv[1]
-    batch_size = int(sys.argv[2]) if len(sys.argv) >= 3 else DEFAULT_BATCH_SIZE
+
+    if len(sys.argv) >= 3:
+        batch_size = int(sys.argv[2])
+    else:
+        batch_size = DEFAULT_BATCH_SIZE
 
     try:
         insert_batches(csv_file_path, batch_size)
